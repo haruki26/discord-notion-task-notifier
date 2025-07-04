@@ -16,12 +16,11 @@ const _createTaskMessage = (
     url: string,
     assignUsers: string[],
     due: string,
-): DiscordWebhookPayload => ({
-    "content": `## [${taskName}](${url})`
-                + `assign: ${assignUsers.map(_convertUserId).join(" ")}`
-                + `due: ${due}`,
-    "allowed_mentions": { "parse": ["users"], "replied_user": true }
-})
+): string => (
+    `## [${taskName}](${url})`
+    + `assign: ${assignUsers.map(_convertUserId).join(" ")}`
+    + `due: ${due}`
+)
 
 export const TEMPLATES = {
     task: _createTaskMessage,
