@@ -10,7 +10,7 @@ import {
 import { TEMPLATES } from "../../services/discord/constants";
 import { sendMessage } from "../../services/discord";
 
-export const notify = async (_: Context): Promise<void> => {
+export const notify = async (): Promise<void> => {
     const pages = await getAllPagesFromDatabase();
     const sortedPages = sortByPriority(sortByDueDate(pages).slice(0, 3));
     const assignUsers = sortedPages.map(page => getAssignUsers(page));
