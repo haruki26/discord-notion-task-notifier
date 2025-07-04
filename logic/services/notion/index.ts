@@ -2,6 +2,7 @@ import { Client } from "@notionhq/client";
 import type {
     PartialPageObjectResponse,
     QueryDatabaseParameters,
+    QueryDatabaseResponse,
 } from "@notionhq/client/build/src/api-endpoints";
 
 import { envVars } from "../../utils";
@@ -21,55 +22,50 @@ const getAllPagesFromDatabase = async (
     let cursor: string | undefined = undefined;
 
     do {
-        const response = await client.databases.query({
-            database_id: databaseId,
-            page_size: 100,
-            start_cursor: cursor,
-            ...queryProperties,
-        });
+        try {
+            const response: QueryDatabaseResponse = await client.databases.query({
+                database_id: databaseId,
+                page_size: 100,
+                start_cursor: cursor,
+                ...queryProperties,
+            });
 
-        pages.push(...response.results.filter(
-            (page): page is PartialPageObjectResponse => "object" in page
-        ));
-        cursor = response.has_more ? response.next_cursor ?? undefined : undefined;
+            pages.push(...response.results.filter(
+                (page): page is PartialPageObjectResponse => "object" in page
+            ));
+            cursor = response.has_more ? response.next_cursor ?? undefined : undefined;
+        } catch (error) {
+            console.error("Error querying Notion database:", error);
+            throw error;
+        }
     } while (cursor);
 
     return pages;
 }
 
-const _hasProperty = <PT>(
-    page: PartialPageObjectResponse,
-    propertyName: string,
-    typeGuard: (prop: unknown) => prop is PT
-): page is PartialPageObjectResponse & { properties: Record<string, PT> } => {
-    if (
-        "properties" in page &&
+type PartialPageObjectResponseWithProperties<PT = unknown> = PartialPageObjectResponse & {
+    properties: Record<string, PT>;
+}
+
+const _hasProperty = (
+    page: PartialPageObjectResponse
+): page is PartialPageObjectResponseWithProperties => {
+    return "properties" in page &&
         typeof page.properties === "object" &&
-        page.properties !== null &&
-        propertyName in page.properties
-    ) {
-        const prop = (page.properties as Record<string, unknown>)[propertyName];
-        if (typeGuard) {
-            return typeGuard(prop);
-        }
-        return true;
-    }
-    return false;
+        page.properties !== null;
 }
 
 const sortByDueDate = (pages: PartialPageObjectResponse[]) => {
     const pName = PROPERTY_NAMES.dueDate;
+    const hasDateProperty = (
+        page: PartialPageObjectResponseWithProperties
+    ): page is PartialPageObjectResponseWithProperties<DatePropertyValue> => {
+        return isDatePropertyValue(page.properties[pName]);
+    }
+
     return pages
-        .map(page => {
-            if (_hasProperty<DatePropertyValue>(page, pName, isDatePropertyValue)) {
-                const prop = page.properties[pName];
-                if (prop.date && prop.date.start) {
-                    return page;
-                }
-            }
-            return null
-        })
-        .filter(page => page !== null)
+        .filter(_hasProperty)
+        .filter(hasDateProperty)
         .sort((a, b) => {
             const aDate = a.properties[pName];
             const bDate = b.properties[pName];
@@ -82,17 +78,15 @@ const sortByDueDate = (pages: PartialPageObjectResponse[]) => {
 
 const sortByPriority = (pages: PartialPageObjectResponse[]) => {
     const pName = PROPERTY_NAMES.priority;
+    const hasPriorityProperty = (
+        page: PartialPageObjectResponseWithProperties
+    ): page is PartialPageObjectResponseWithProperties<SelectPropertyValue> => {
+        return isSelectPropertyValue(page.properties[pName]) && !!page.properties[pName].select && !!page.properties[pName].select.name;
+    };
+
     return pages
-        .map(page => {
-            if (_hasProperty<SelectPropertyValue>(page, pName, isSelectPropertyValue)) {
-                const prop = page.properties[pName];
-                if (prop.select && prop.select.name) {
-                    return page;
-                }
-            }
-            return null;
-        })
-        .filter(page => page !== null)
+        .filter(_hasProperty)
+        .filter(hasPriorityProperty)
         .sort((a, b) => {
             const aPriority = a.properties[pName];
             const bPriority = b.properties[pName];
@@ -100,16 +94,20 @@ const sortByPriority = (pages: PartialPageObjectResponse[]) => {
                 return aPriority.select.name.localeCompare(bPriority.select.name);
             }
             return 0;
-        })
+        });
 }
 
 const getAssignUsers = (page: PartialPageObjectResponse): string[] => {
     const pName = PROPERTY_NAMES.assignUsers;
-    if (_hasProperty<MultiSelectPropertyValue>(page, pName, isMultiSelectPropertyValue)) {
-        const prop = page.properties[pName];
-        return prop.multi_select.map(ms => ms.name)
-    }
-    return [];
+    if (!_hasProperty(page)) return [];
+    const hasAssignUsersProperty = (
+        p: PartialPageObjectResponseWithProperties
+    ): p is PartialPageObjectResponseWithProperties<MultiSelectPropertyValue> => {
+        return isMultiSelectPropertyValue(p.properties[pName]);
+    };
+    if (!hasAssignUsersProperty(page)) return [];
+    const prop = page.properties[pName];
+    return Array.isArray(prop.multi_select) ? prop.multi_select.map(ms => ms.name) : [];
 }
 
 export {
