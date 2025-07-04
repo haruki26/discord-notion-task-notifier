@@ -8,6 +8,7 @@ const _getEnv = (key: string): string => {
 
 export const envVars = {
     APP_ENVIRONMENT: () => _getEnv('APP_ENVIRONMENT'),
+    API_KEY: () => _getEnv('API_KEY'),
     NOTION_API_TOKEN: () => _getEnv('NOTION_API_TOKEN'),
     NOTION_DATABASE_ID: () => _getEnv('NOTION_DATABASE_ID'),
     DISCORD_WEBHOOK_URL: () => _getEnv('DISCORD_WEBHOOK_URL'),
