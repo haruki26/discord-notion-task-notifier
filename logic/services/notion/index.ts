@@ -6,8 +6,8 @@ import type {
 } from "@notionhq/client/build/src/api-endpoints";
 
 import { envVars } from "../../utils";
-import { isDatePropertyValue, isMultiSelectPropertyValue, isSelectPropertyValue } from "./typeGuards";
-import { DatePropertyValue, MultiSelectPropertyValue, SelectPropertyValue } from "./types";
+import { isDatePropertyValue, isMultiSelectPropertyValue, isSelectPropertyValue, isTitlePropertyValue } from "./typeGuards";
+import { DatePropertyValue, MultiSelectPropertyValue, SelectPropertyValue, TitlePropertyValue } from "./types";
 import { PRIORITY_ORDER, PROPERTY_NAMES } from "./constants";
 
 const client = new Client({
@@ -107,16 +107,50 @@ const sortByPriority = (pages: PartialPageObjectResponse[]) => {
 }
 
 const getAssignUsers = (page: PartialPageObjectResponse): string[] => {
-    const pName = PROPERTY_NAMES.assignUsers;
     if (!_hasProperty(page)) return [];
+    const pName = PROPERTY_NAMES.assignUsers;
+
     const hasAssignUsersProperty = (
         p: PartialPageObjectResponseWithProperties
     ): p is PartialPageObjectResponseWithProperties<MultiSelectPropertyValue> => {
         return isMultiSelectPropertyValue(p.properties[pName]);
     };
     if (!hasAssignUsersProperty(page)) return [];
+
     const prop = page.properties[pName];
     return Array.isArray(prop.multi_select) ? prop.multi_select.map(ms => ms.name) : [];
+}
+
+const getTaskName = (page: PartialPageObjectResponse): string => {
+    if (!_hasProperty(page)) return "";
+    const pName = PROPERTY_NAMES.title;
+
+    const hasTitleProperty = (
+        p: PartialPageObjectResponseWithProperties
+    ): p is PartialPageObjectResponseWithProperties<TitlePropertyValue> => {
+        return isTitlePropertyValue(p.properties[pName]);
+    };
+    if (!hasTitleProperty(page)) return "";
+
+    const prop = page.properties[pName];
+    return Array.isArray(prop.title) && prop.title[0]?.plain_text
+        ? prop.title[0].plain_text
+        : "";
+}
+
+const getDueDate = (page: PartialPageObjectResponse): string => {
+    if (!_hasProperty(page)) return "";
+    const pName = PROPERTY_NAMES.dueDate;
+
+    const hasDateProperty = (
+        p: PartialPageObjectResponseWithProperties
+    ): p is PartialPageObjectResponseWithProperties<DatePropertyValue> => {
+        return isDatePropertyValue(p.properties[pName]);
+    };
+    if (!hasDateProperty(page)) return "";
+
+    const prop = page.properties[pName];
+    return prop.date ? prop.date.start : "";
 }
 
 export {
@@ -124,4 +158,6 @@ export {
     sortByDueDate,
     sortByPriority,
     getAssignUsers,
+    getTaskName,
+    getDueDate,
 };

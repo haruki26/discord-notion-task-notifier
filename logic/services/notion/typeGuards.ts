@@ -2,6 +2,7 @@ import {
     DatePropertyValue,
     MultiSelectPropertyValue,
     SelectPropertyValue,
+    TitlePropertyValue,
 } from "./types";
 
 
@@ -49,8 +50,17 @@ const isMultiSelectPropertyValue = (prop: unknown): prop is MultiSelectPropertyV
         (multiSelect) => Array.isArray(multiSelect) && multiSelect.every(ms => typeof ms.name === 'string')
     );
 
+const isTitlePropertyValue = (prop: unknown): prop is TitlePropertyValue =>
+    _isTypedPropertyValue(
+        prop,
+        'title',
+        'title',
+        (title) => Array.isArray(title) && title.every(t => typeof t.plain_text === 'string')
+    );
+
 export {
     isDatePropertyValue,
     isSelectPropertyValue,
     isMultiSelectPropertyValue,
+    isTitlePropertyValue,
 };
