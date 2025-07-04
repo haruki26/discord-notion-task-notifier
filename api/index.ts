@@ -1,14 +1,15 @@
 import { Hono } from 'hono'
 import { handle } from 'hono/vercel'
+import { envVars } from '../logic/utils'
+
+import demoApp from './demo'
 
 export const config = {
   runtime: 'edge'
 }
 
-const app = new Hono().basePath('/api')
+const app = envVars.APP_ENVIRONMENT() === "production"
+    ? new Hono().basePath('/api')
+    : demoApp;
 
-app.get('/', (c) => {
-  return c.json({ message: 'Hello Hono!' })
-})
-
-export default handle(app)
+export default handle(app);
