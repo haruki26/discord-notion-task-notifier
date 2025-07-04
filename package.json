@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "@notionhq/client": "^4.0.0",
+    "axios": "^1.10.0",
     "hono": "^4.8.3"
   },
   "devDependencies": {
