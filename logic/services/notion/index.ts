@@ -8,7 +8,7 @@ import type {
 import { envVars } from "../../utils";
 import { isDatePropertyValue, isMultiSelectPropertyValue, isSelectPropertyValue } from "./typeGuards";
 import { DatePropertyValue, MultiSelectPropertyValue, SelectPropertyValue } from "./types";
-import { PROPERTY_NAMES } from "./constants";
+import { PRIORITY_ORDER, PROPERTY_NAMES } from "./constants";
 
 const client = new Client({
     auth: envVars.NOTION_API_TOKEN(),
@@ -70,7 +70,7 @@ const sortByDueDate = (pages: PartialPageObjectResponse[]) => {
             const aDate = a.properties[pName];
             const bDate = b.properties[pName];
             if (aDate.date && bDate.date) {
-                return new Date(bDate.date.start).getTime() - new Date(aDate.date.start).getTime();
+                return new Date(aDate.date.start).getTime() - new Date(bDate.date.start).getTime();
             }
             return 0;
         })
@@ -78,20 +78,29 @@ const sortByDueDate = (pages: PartialPageObjectResponse[]) => {
 
 const sortByPriority = (pages: PartialPageObjectResponse[]) => {
     const pName = PROPERTY_NAMES.priority;
+
     const hasPriorityProperty = (
         page: PartialPageObjectResponseWithProperties
     ): page is PartialPageObjectResponseWithProperties<SelectPropertyValue> => {
         return isSelectPropertyValue(page.properties[pName]) && !!page.properties[pName].select && !!page.properties[pName].select.name;
     };
 
+    const priorityIndex = (priority: string): number => {
+        const idx = PRIORITY_ORDER.findIndex(name => priority === name)
+        return idx !== -1 ? idx : PRIORITY_ORDER.length;
+    }
+
     return pages
         .filter(_hasProperty)
         .filter(hasPriorityProperty)
         .sort((a, b) => {
-            const aPriority = a.properties[pName];
-            const bPriority = b.properties[pName];
-            if (aPriority.select && bPriority.select) {
-                return aPriority.select.name.localeCompare(bPriority.select.name);
+            const aPriority = a.properties[pName].select;
+            const bPriority = b.properties[pName].select;
+
+            if (aPriority && bPriority) {
+                const aOrder = priorityIndex(aPriority.name);
+                const bOrder = priorityIndex(bPriority.name);
+                return aOrder - bOrder;
             }
             return 0;
         });
