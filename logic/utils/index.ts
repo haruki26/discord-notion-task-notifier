@@ -15,6 +15,8 @@ export const envVars = {
 } as const;
 
 export const parseJson = <T = never>(jsonString: string): T => {
+    // zodはめんどいからいれない
+    // 気が向いたら入れる
     try {
         return JSON.parse(jsonString);
     } catch (error) {

@@ -62,8 +62,11 @@ type AllowedMentions = {
     replied_user: boolean;
 }
 
+type UserIds = Record<string, number>;
+
 export type {
     DiscordWebhookPayload,
     DiscordEmbed,
-    AllowedMentions
+    AllowedMentions,
+    UserIds,
 }
