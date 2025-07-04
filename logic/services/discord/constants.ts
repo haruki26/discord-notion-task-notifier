@@ -17,9 +17,11 @@ const _createTaskMessage = (
     assignUsers: string[],
     due: string,
 ): string => (
-    `## [${taskName}](${url})`
-    + `assign: ${assignUsers.map(_convertUserId).join(" ")}`
-    + `due: ${due}`
+    [
+        `## [${taskName}](${url})`,
+        `assign: ${assignUsers.map(_convertUserId).join(" ")}`,
+        `due: ${due}`,
+    ].join("\n")
 )
 
 export const TEMPLATES = {
