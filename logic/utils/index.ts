@@ -11,4 +11,13 @@ export const envVars = {
     NOTION_API_TOKEN: () => _getEnv('NOTION_API_TOKEN'),
     NOTION_DATABASE_ID: () => _getEnv('NOTION_DATABASE_ID'),
     DISCORD_WEBHOOK_URL: () => _getEnv('DISCORD_WEBHOOK_URL'),
+    DISCORD_USERID_JSON: () => _getEnv('DISCORD_USERID_JSON'),
 } as const;
+
+export const parseJson = <T = never>(jsonString: string): T => {
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        throw new Error(`Failed to parse JSON. Error: ${error}`);
+    }
+}
