@@ -1,14 +1,3 @@
-type DiscordWebhookPayload = {
-    content?: string;
-    username?: string;
-    avatar_url?: string;
-    tts?: boolean;
-    embeds?: DiscordEmbed[];
-    allowed_mentions?: AllowedMentions;
-    components?: unknown[];
-    attachments?: unknown[];
-}
-
 type DiscordEmbed = {
     title?: string;
     description?: string;
@@ -62,11 +51,20 @@ type AllowedMentions = {
     replied_user: boolean;
 }
 
+type DiscordWebhookPayload = {
+    content?: string;
+    username?: string;
+    avatar_url?: string;
+    tts?: boolean;
+    embeds?: DiscordEmbed[];
+    allowed_mentions?: AllowedMentions;
+    components?: unknown[];
+    attachments?: unknown[];
+}
+
 type UserIds = Record<string, number>;
 
 export type {
     DiscordWebhookPayload,
-    DiscordEmbed,
-    AllowedMentions,
     UserIds,
 }
