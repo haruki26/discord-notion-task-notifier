@@ -6,8 +6,21 @@ import type {
 } from "@notionhq/client/build/src/api-endpoints";
 
 import { envVars } from "../../utils";
-import { isDatePropertyValue, isMultiSelectPropertyValue, isSelectPropertyValue, isTitlePropertyValue } from "./typeGuards";
-import { DatePropertyValue, MultiSelectPropertyValue, SelectPropertyValue, TitlePropertyValue } from "./types";
+import {
+    isDatePropertyValue,
+    isMultiSelectPropertyValue,
+    isSelectPropertyValue,
+    isStatusPropertyValue,
+    isTitlePropertyValue
+} from "./typeGuards";
+import type {
+    DatabaseStatus,
+    DatePropertyValue,
+    MultiSelectPropertyValue,
+    SelectPropertyValue,
+    StatusPropertyValue,
+    TitlePropertyValue
+} from "./types";
 import { PRIORITY_ORDER, PROPERTY_NAMES } from "./constants";
 
 const client = new Client({
@@ -73,7 +86,7 @@ const sortByDueDate = <T extends PartialPageObjectResponse>(pages: T[]): (T & Pr
                 return new Date(aDate.date.start).getTime() - new Date(bDate.date.start).getTime();
             }
             return 0;
-        })
+        });
 }
 
 const sortByPriority = <T extends PartialPageObjectResponse>(pages: T[]): (T & Property<SelectPropertyValue>)[] => {
@@ -93,15 +106,15 @@ const sortByPriority = <T extends PartialPageObjectResponse>(pages: T[]): (T & P
     return pages
         .filter(page => _hasProperty(page) && hasPriorityProperty(page))
         .sort((a, b) => {
-        const aPriority = a.properties[pName].select;
-        const bPriority = b.properties[pName].select;
-        if (aPriority && bPriority) {
-            const aOrder = priorityIndex(aPriority.name);
-            const bOrder = priorityIndex(bPriority.name);
-            return aOrder - bOrder;
-        }
-        return 0;
-    });
+            const aPriority = a.properties[pName].select;
+            const bPriority = b.properties[pName].select;
+            if (aPriority && bPriority) {
+                const aOrder = priorityIndex(aPriority.name);
+                const bOrder = priorityIndex(bPriority.name);
+                return aOrder - bOrder;
+            }
+            return 0;
+        });
 }
 
 const getAssignUsers = (page: PartialPageObjectResponse): string[] => {
@@ -151,6 +164,29 @@ const getDueDate = (page: PartialPageObjectResponse): string => {
     return prop.date ? prop.date.start : "";
 }
 
+const filterByStatus = <T extends PartialPageObjectResponse>(
+    pages: T[],
+    filterBy: DatabaseStatus[],
+): (T & Property<StatusPropertyValue>)[] => {
+    const pName = PROPERTY_NAMES.status;
+
+    const hasStatusProperty = (
+        p: PartialPageObjectResponseWithProperties
+    ): p is PartialPageObjectResponseWithProperties<StatusPropertyValue> => {
+        return isStatusPropertyValue(p.properties[pName]);
+    };
+
+    return pages
+        .filter(page => _hasProperty(page) && hasStatusProperty(page))
+        .filter(hasStatusProperty)
+        .filter(page =>
+            filterBy.findIndex(
+                status => status === page.properties[pName].status?.name
+            ) === -1
+        );
+}
+
+
 export {
     getAllPagesFromDatabase,
     sortByDueDate,
@@ -158,4 +194,5 @@ export {
     getAssignUsers,
     getTaskName,
     getDueDate,
+    filterByStatus,
 };

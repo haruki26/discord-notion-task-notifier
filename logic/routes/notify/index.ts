@@ -1,5 +1,6 @@
 import { Context } from "hono";
 import {
+    filterByStatus,
     getAllPagesFromDatabase,
     getAssignUsers,
     getDueDate,
@@ -12,7 +13,8 @@ import { sendMessage } from "../../services/discord";
 
 export const notify = async (): Promise<void> => {
     const pages = await getAllPagesFromDatabase();
-    const sortedPages = sortByPriority(sortByDueDate(pages).slice(0, 3));
+    const filterPages = filterByStatus(pages, ["待機", "完了"]);
+    const sortedPages = sortByPriority(sortByDueDate(filterPages).slice(0, 3));
     const assignUsers = sortedPages.map(page => getAssignUsers(page));
 
     const message = sortedPages.map((page, idx) => {

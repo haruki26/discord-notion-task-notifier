@@ -1,7 +1,8 @@
-import {
+import type {
     DatePropertyValue,
     MultiSelectPropertyValue,
     SelectPropertyValue,
+    StatusPropertyValue,
     TitlePropertyValue,
 } from "./types";
 
@@ -58,9 +59,18 @@ const isTitlePropertyValue = (prop: unknown): prop is TitlePropertyValue =>
         (title) => Array.isArray(title) && title.every(t => typeof t.plain_text === 'string')
     );
 
+const isStatusPropertyValue = (prop: unknown): prop is StatusPropertyValue =>
+    _isTypedPropertyValue(
+        prop,
+        'status',
+        'status',
+        (status) => typeof status.name === 'string'
+    );
+
 export {
     isDatePropertyValue,
     isSelectPropertyValue,
     isMultiSelectPropertyValue,
     isTitlePropertyValue,
+    isStatusPropertyValue,
 };

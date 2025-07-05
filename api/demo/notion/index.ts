@@ -4,6 +4,7 @@ import {
     sortByDueDate,
     sortByPriority,
     getAssignUsers,
+    filterByStatus,
 } from "./../../../logic/services/notion";
 import type { Context } from 'hono';
 
@@ -32,6 +33,12 @@ app.get('/assign-users', async (c: Context) => {
     const pages = await getAllPagesFromDatabase();
     const users = pages.map(getAssignUsers);
     return c.json(users);
+});
+
+app.get('filter', async (c: Context) => {
+    const pages = await getAllPagesFromDatabase();
+    const filter = filterByStatus(pages, ["待機", "完了"]);
+    return c.json(filter);
 });
 
 export default app;
