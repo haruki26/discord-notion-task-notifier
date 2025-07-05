@@ -9,7 +9,7 @@ export const config = {
   runtime: 'edge'
 }
 
-const app = envVars.APP_ENVIRONMENT() === "production"
+const app = envVars.APP_ENVIRONMENT === "production"
     ? productionApp
     : demoApp;
 

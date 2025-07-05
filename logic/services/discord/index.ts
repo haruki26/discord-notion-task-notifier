@@ -6,7 +6,7 @@ import type { DiscordWebhookPayload } from "./types";
 
 const sendMessage = async (payload: DiscordWebhookPayload): Promise<void> => {
     try {
-        const response = await axios.post(envVars.DISCORD_WEBHOOK_URL(), payload);
+        const response = await axios.post(envVars.DISCORD_WEBHOOK_URL, payload);
 
         if (response.status === 204) {
             console.log('メッセージが正常に送信されました！');

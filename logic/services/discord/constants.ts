@@ -1,7 +1,7 @@
 import { envVars, parseJson } from "../../utils"
 import { DiscordWebhookPayload, UserIds } from "./types"
 
-const USER_IDS = parseJson<UserIds>(envVars.DISCORD_USERID_JSON())
+const USER_IDS = parseJson<UserIds>(envVars.DISCORD_USERID_JSON)
 
 const _convertUserId = (userName: string): string => {
     const userId = USER_IDS[userName];

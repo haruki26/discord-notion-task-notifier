@@ -11,11 +11,11 @@ import { DatePropertyValue, MultiSelectPropertyValue, SelectPropertyValue, Title
 import { PRIORITY_ORDER, PROPERTY_NAMES } from "./constants";
 
 const client = new Client({
-    auth: envVars.NOTION_API_TOKEN(),
+    auth: envVars.NOTION_API_TOKEN,
 });
 
 const getAllPagesFromDatabase = async (
-    databaseId: string = envVars.NOTION_DATABASE_ID(),
+    databaseId: string = envVars.NOTION_DATABASE_ID,
     queryProperties: Omit<QueryDatabaseParameters, "database_id" | "page_size" | "start_cursor"> = {}
 ): Promise<PartialPageObjectResponse[]> => {
     const pages = [];
