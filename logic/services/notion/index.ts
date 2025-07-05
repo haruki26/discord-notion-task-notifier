@@ -43,9 +43,10 @@ const getAllPagesFromDatabase = async (
     return pages;
 }
 
-type PartialPageObjectResponseWithProperties<PT = unknown> = PartialPageObjectResponse & {
-    properties: Record<string, PT>;
-}
+type Property<PT = unknown> = { properties: Record<string, PT> };
+
+type PartialPageObjectResponseWithProperties<PT = unknown> = 
+    PartialPageObjectResponse & Property<PT>;
 
 const _hasProperty = (
     page: PartialPageObjectResponse
@@ -55,7 +56,7 @@ const _hasProperty = (
         page.properties !== null;
 }
 
-const sortByDueDate = (pages: PartialPageObjectResponse[]) => {
+const sortByDueDate = <T extends PartialPageObjectResponse>(pages: T[]): (T & Property<DatePropertyValue>)[] => {
     const pName = PROPERTY_NAMES.dueDate;
     const hasDateProperty = (
         page: PartialPageObjectResponseWithProperties
@@ -64,8 +65,7 @@ const sortByDueDate = (pages: PartialPageObjectResponse[]) => {
     }
 
     return pages
-        .filter(_hasProperty)
-        .filter(hasDateProperty)
+        .filter(page => _hasProperty(page) && hasDateProperty(page))
         .sort((a, b) => {
             const aDate = a.properties[pName];
             const bDate = b.properties[pName];
@@ -76,7 +76,7 @@ const sortByDueDate = (pages: PartialPageObjectResponse[]) => {
         })
 }
 
-const sortByPriority = (pages: PartialPageObjectResponse[]) => {
+const sortByPriority = <T extends PartialPageObjectResponse>(pages: T[]): (T & Property<SelectPropertyValue>)[] => {
     const pName = PROPERTY_NAMES.priority;
 
     const hasPriorityProperty = (
@@ -86,24 +86,22 @@ const sortByPriority = (pages: PartialPageObjectResponse[]) => {
     };
 
     const priorityIndex = (priority: string): number => {
-        const idx = PRIORITY_ORDER.findIndex(name => priority === name)
+        const idx = PRIORITY_ORDER.findIndex(name => priority === name);
         return idx !== -1 ? idx : PRIORITY_ORDER.length;
-    }
+    };
 
     return pages
-        .filter(_hasProperty)
-        .filter(hasPriorityProperty)
+        .filter(page => _hasProperty(page) && hasPriorityProperty(page))
         .sort((a, b) => {
-            const aPriority = a.properties[pName].select;
-            const bPriority = b.properties[pName].select;
-
-            if (aPriority && bPriority) {
-                const aOrder = priorityIndex(aPriority.name);
-                const bOrder = priorityIndex(bPriority.name);
-                return aOrder - bOrder;
-            }
-            return 0;
-        });
+        const aPriority = a.properties[pName].select;
+        const bPriority = b.properties[pName].select;
+        if (aPriority && bPriority) {
+            const aOrder = priorityIndex(aPriority.name);
+            const bOrder = priorityIndex(bPriority.name);
+            return aOrder - bOrder;
+        }
+        return 0;
+    });
 }
 
 const getAssignUsers = (page: PartialPageObjectResponse): string[] => {
