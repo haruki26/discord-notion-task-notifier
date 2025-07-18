@@ -1,15 +1,4 @@
-import { envVars, parseJson } from "../../utils"
-import { DiscordWebhookPayload, UserIds } from "./types"
-
-const USER_IDS = parseJson<UserIds>(envVars.DISCORD_USERID_JSON)
-
-const _convertUserId = (userName: string): string => {
-    const userId = USER_IDS[userName];
-    if (!userId) {
-        return `@${userName}`;
-    }
-    return `<@${userId}>`;
-}
+import { convertUserId } from "."
 
 const _createTaskMessage = (
     taskName: string,
@@ -18,9 +7,9 @@ const _createTaskMessage = (
     due: string,
 ): string => (
     [
-        `## [${taskName}](${url})`,
-        `assign: ${assignUsers.map(_convertUserId).join(" ")}`,
-        `due: ${due}`,
+        `:memo: [${taskName}](${url})`,
+        `:busts_in_silhouette: assign: ${assignUsers.map(convertUserId).join(" ")}`,
+        `:alarm_clock: due: ${due}`,
     ].join("\n")
 )
 

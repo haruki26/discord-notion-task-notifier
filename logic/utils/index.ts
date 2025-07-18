@@ -13,6 +13,7 @@ export const envVars = {
     NOTION_DATABASE_ID: _getEnv('NOTION_DATABASE_ID'),
     DISCORD_WEBHOOK_URL: _getEnv('DISCORD_WEBHOOK_URL'),
     DISCORD_USERID_JSON: _getEnv('DISCORD_USERID_JSON'),
+    DiSCORD_ROLEID_JSON: _getEnv('DISCORD_ROLEID_JSON'),
 } as const;
 
 export const parseJson = <T = never>(jsonString: string): T => {

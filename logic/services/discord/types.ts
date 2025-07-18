@@ -62,9 +62,9 @@ type DiscordWebhookPayload = {
     attachments?: unknown[];
 }
 
-type UserIds = Record<string, string>;
+type Ids = Record<string, string>;
 
 export type {
     DiscordWebhookPayload,
-    UserIds,
+    Ids,
 }

@@ -21,7 +21,7 @@ import type {
     StatusPropertyValue,
     TitlePropertyValue
 } from "./types";
-import { PRIORITY_ORDER, PROPERTY_NAMES } from "./constants";
+import { PRIORITY_ORDER, PROPERTY_NAMES, CATEGORIES } from "./constants";
 
 const client = new Client({
     auth: envVars.NOTION_API_TOKEN,
@@ -211,6 +211,35 @@ const filterByStatus = <T extends PartialPageObjectResponse>(
         );
 }
 
+const splitByCategory = <T extends PartialPageObjectResponse>(
+    pages: T[],
+): { front: T[]; back: T[]; } => {
+    const pName = PROPERTY_NAMES.category;
+
+    const hasCategoryProperty = (p: T & Property): p is T & Property<SelectPropertyValue> => {
+        return isSelectPropertyValue(p.properties[pName]);
+    };
+
+    const filteredPages = pages
+        .filter(_hasProperty)
+        .filter(hasCategoryProperty)
+        .filter(page => !!page.properties[pName].select && !!page.properties[pName].select.name);
+
+    const front = filteredPages.filter(
+        page => !!page.properties[pName].select
+            && page.properties[pName].select.name === CATEGORIES[0]
+    );
+    const back = filteredPages.filter(
+        page => !!page.properties[pName].select
+            && page.properties[pName].select.name === CATEGORIES[1]
+    );
+
+    return {
+        front,
+        back,
+    };
+}
+
 
 export {
     getAllPagesFromDatabase,
@@ -220,4 +249,5 @@ export {
     getTaskName,
     getDueDate,
     filterByStatus,
+    splitByCategory,
 };
