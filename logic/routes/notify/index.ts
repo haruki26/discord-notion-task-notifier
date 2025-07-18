@@ -9,7 +9,7 @@ import {
     splitByCategory
 } from "../../services/notion";
 import { TEMPLATES } from "../../services/discord/constants";
-import { sendMessage } from "../../services/discord";
+import { convertRoleId, sendMessage } from "../../services/discord";
 
 export const notify = async (): Promise<void> => {
     const pages = await getAllPagesFromDatabase();
@@ -39,7 +39,7 @@ export const notify = async (): Promise<void> => {
         await sendMessage({
             "content": [
                 "# 仕事ノコッテルヨ？ :fire:",
-                `Hey, ${category} team.`,
+                `Hey, ${convertRoleId(category)} team.`,
                 "If you don't finish soon, you're gonna get into trouble!",
                 `\n${message}`
             ].join("\n"),
