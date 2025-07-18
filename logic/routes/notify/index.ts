@@ -35,7 +35,7 @@ export const notify = async (): Promise<void> => {
             const users = assignUsers[idx];
             const due = getDueDate(page);
             return TEMPLATES.task(taskName, url, users, due);
-        }).join("\n\n");
+        });
 
         await sendMessage({
             "content": [
