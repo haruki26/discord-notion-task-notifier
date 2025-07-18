@@ -28,7 +28,8 @@ export const notify = async (): Promise<void> => {
         }
 
         const assignUsers = pages.map(page => getAssignUsers(page));
-        const message = pages.map((page, idx) => {
+        const role = convertRoleId(category);
+        const messages = pages.map((page, idx) => {
             const taskName = getTaskName(page);
             const url = `https://www.notion.so/${page.id.replace(/-/g, "")}`;
             const users = assignUsers[idx];
@@ -39,11 +40,21 @@ export const notify = async (): Promise<void> => {
         await sendMessage({
             "content": [
                 "# 仕事ノコッテルヨ？ :fire:",
-                `Hey, ${convertRoleId(category)} team.`,
+                `Hey, ${role} team.`,
                 "If you don't finish soon, you're gonna get into trouble!",
-                `\n${message}`
             ].join("\n"),
-            "allowed_mentions": { "parse": ["users", "roles"], "replied_user": true },
+            "allowed_mentions": {
+                "parse": ["users"],
+                "replied_user": true,
+                "roles": [role.replace(/<@&/g, "").replace(/>/g, "")]
+            },
         });
+
+        for (const message of messages) {
+            await sendMessage({
+                "content": message,
+                "allowed_mentions": { "parse": ["users"], "replied_user": true },
+            });
+        }
     }
 }

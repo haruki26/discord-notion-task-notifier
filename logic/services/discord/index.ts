@@ -32,7 +32,7 @@ const convertRoleId = (roleName: string): string => {
     if (!roleId) {
         return `@${roleName}`;
     }
-    return `<@${roleId}>`;
+    return `<@&${roleId}>`;
 }
 
 export {
