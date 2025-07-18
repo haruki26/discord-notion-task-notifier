@@ -17,10 +17,12 @@ export const notify = async (): Promise<void> => {
     const sortedFrontPages = sortByPriority(sortByDueDate(filterPages.front).slice(0, 3));
     const sortedBackPages = sortByPriority(sortByDueDate(filterPages.back).slice(0, 3));
 
-    [
+    const splitPages = [
         { category: "front", pages: sortedFrontPages },
         { category: "back", pages: sortedBackPages },
-    ].forEach(async ({category, pages}) => {
+    ];
+
+    for(const {category, pages} of splitPages) {
         if (pages.length === 0) {
             return;
         }
@@ -35,8 +37,13 @@ export const notify = async (): Promise<void> => {
         }).join("\n\n");
 
         await sendMessage({
-            "content": `#  :memo: ${category}'s タスク\n\n${message}`,
+            "content": [
+                "# 仕事ノコッテルヨ？ :fire:",
+                `Hey, ${category} team.`,
+                "If you don't finish soon, you're gonna get into trouble!",
+                `\n${message}`
+            ].join("\n"),
             "allowed_mentions": { "parse": ["users", "roles"], "replied_user": true },
         });
-    })
+    }
 }

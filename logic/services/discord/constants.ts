@@ -10,7 +10,7 @@ const _createTaskMessage = (
         `:memo: [${taskName}](${url})`,
         `:busts_in_silhouette: assign: ${assignUsers.map(convertUserId).join(" ")}`,
         `:alarm_clock: due: ${due}`,
-    ].join("\n")
+    ].join("\n\n")
 )
 
 export const TEMPLATES = {
