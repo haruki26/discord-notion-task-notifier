@@ -24,7 +24,7 @@ export const notify = async (): Promise<void> => {
 
     for(const {category, pages} of splitPages) {
         if (pages.length === 0) {
-            return;
+            continue;
         }
 
         const assignUsers = pages.map(page => getAssignUsers(page));
